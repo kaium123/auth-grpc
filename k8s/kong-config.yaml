@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+data:
+  kong-template.yml: |
+    _format_version: "2.1"
+    _transform: true
+
+    services:
+
+    - name: envoy_svc
+      host: 192.168.49.2
+      port: 30841
+      routes:
+      - name: envoy_svc
+        strip_path: false
+        paths: ["/grpcservice"]
+        methods: ["POST", "GET"]
+      

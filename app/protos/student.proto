@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package book;
+option go_package ="/app/protos/";
+
+import "google/api/annotations.proto";
+
+
+service Student {
+    rpc Login(LoginRequestBody) returns(LoginResponseBody){
+        option (google.api.http) = {
+            post : "/auth/student/login"
+        };
+    }
+    rpc GetToken(Token) returns(GetTokenResponseBody){
+        option (google.api.http) = {
+            get : "/auth/student/get"
+        };
+    }
+    rpc SignUp(SignUpRequestBody) returns(LoginResponseBody){
+        option (google.api.http) = {
+            post : "/auth/student/signup"
+        };
+    }
+}
+
+message LoginRequestBody {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponseBody {
+    int32 id = 1;
+    string msg = 2;
+    string token = 3;
+}
+
+message GetTokenResponseBody {
+    int32 id = 1;
+    string username = 2;
+    string password = 3;
+}
+
+message Token {
+   string token = 1;
+}
+
+message SignUpRequestBody {
+    string username = 1;
+    string password = 2;
+}
+

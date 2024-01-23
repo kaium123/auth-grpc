@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"kind":"Deployment","apiVersion":"apps/v1","metadata":{"name":"my-deployment","creationTimestamp":null,"labels":{"app":"my-deployment"}},"spec":{"replicas":3,"selector":{"matchLabels":{"app":"my-deployment"}},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"my-deployment"}},"spec":{"containers":[{"name":"nginx","image":"nginx:latest","resources":{}}]}},"strategy":{}},"status":{}}
+  creationTimestamp: null
+  labels:
+    app: my-deployment
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-deployment
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: my-deployment
+    spec:
+      containers:
+      - image: nginx:latest
+        name: nginx
+        resources: {}
+status: {}

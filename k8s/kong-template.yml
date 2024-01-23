@@ -1,0 +1,14 @@
+_format_version: "2.1"
+_transform: true
+
+services:
+
+- name: envoy_svc
+  host: envoy_container
+  port: 8085
+  routes:
+  - name: envoy_svc
+    strip_path: false
+    paths: ["/grpcservice"]
+    methods: ["POST", "GET"]
+   

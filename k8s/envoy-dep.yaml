@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mainapp-envoy-sidecar-deployment
+  labels:
+    app: mainapp-envoy-sidecar
+spec:
+  selector:
+    matchLabels:
+      app: mainapp-envoy-sidecar
+  template:
+    metadata:
+      labels:
+        app: mainapp-envoy-sidecar
+    spec:
+      containers:
+      - name: mainapp-envoy-sidecar
+        image: kaium123/envoy:1.5
+
+        ports:
+        - containerPort: 5199
+          name: envoy-port
+        volumeMounts:
+        - name: envoy-config-volume
+          mountPath: /etc/envoy
+      volumes:
+      - name: envoy-config-volume
+        configMap:
+          name: envoy-config
+          items:
+          - key: envoy.yaml
+            path: envoy.yaml
+
+        
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mainapp-envoy-sidecar-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: mainapp-envoy-sidecar
+  ports:
+  # Service only exposes the Envoy container
+  - name: mainapp-envoy-sidecar-svc-port
+    protocol: TCP
+    port: 5199
+    targetPort: 5199

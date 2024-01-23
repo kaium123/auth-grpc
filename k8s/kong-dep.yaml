@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong-deployment
+  labels:
+    app: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+      - name: kong
+        image: kong:latest
+        ports:
+        - containerPort: 8000
+        - containerPort: 8001
+        - containerPort: 8443
+        - containerPort: 8444
+        env:
+        - name: KONG_DATABASE
+          value: "off"  
+        - name: KONG_DECLARATIVE_CONFIG
+          value: /home/kong/config.yml
+        - name: KONG_PROXY_LISTEN
+          value: 0.0.0.0:8000
+        - name: KONG_ADMIN_LISTEN
+          value: 0.0.0.0:8001
+        - name: KONG_LOG_LEVEL
+          value: debug
+        - name: KONG_PROXY_ACCESS_LOG
+          value: /dev/stdout
+        - name: KONG_ADMIN_ACCESS_LOG
+          value: /dev/stdout
+        - name: KONG_PROXY_ERROR_LOG
+          value: /dev/stderr
+        - name: KONG_ADMIN_ERROR_LOG
+          value: /dev/stderr
+        - name: AUTH_URL
+          value: auth
+        - name: AUTH_PORT
+          value: "8089"
+        - name: ECHO_URL
+          value: echo
+        volumeMounts:
+        - name: kong-config-volume
+          mountPath: /home/kong/config.yml
+          subPath: kong-template.yml
+      volumes:
+      - name: kong-config-volume
+        configMap:
+          name: kong-config
+          items:
+          - key: kong-template.yml
+            path: kong-template.yml
+
+      restartPolicy: Always
+
