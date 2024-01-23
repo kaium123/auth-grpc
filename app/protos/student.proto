@@ -37,12 +37,12 @@ message LoginResponseBody {
 
 message GetTokenResponseBody {
     int32 id = 1;
-    string username = 2;
-    string password = 3;
+    string message = 2;
 }
 
 message Token {
    string token = 1;
+   
 }
 
 message SignUpRequestBody {

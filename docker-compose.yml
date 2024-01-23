@@ -25,13 +25,13 @@ services:
       - mygrpcnetwork
     restart: unless-stopped
 
-  grpc-service:
-    container_name: grpc-service
+  auth-service:
+    container_name: auth-service
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "50051:50051"
+      - "50052:50052"
     labels:
       logging: "promtail"
       logging_jobname: "containerlogs"
@@ -40,10 +40,8 @@ services:
     depends_on:
       - sm-db
     restart: unless-stopped
-    env_file:
-      - base.env
     environment:
-      CONSUL_PATH: grpc-svc
+      CONSUL_PATH: auth
       CONSUL_URL: consul:8500
 
   envoy-proxy:
@@ -57,7 +55,7 @@ services:
       - "8081:8081"
       - "8085:8085"
     depends_on:
-      - grpc-service
+      - auth-service
     networks:
       - mygrpcnetwork
 

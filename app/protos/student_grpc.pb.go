@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.12.4
-// source: auth/protos/student.proto
+// source: app/protos/student.proto
 
 package protos
 
@@ -179,5 +179,5 @@ var Student_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "auth/protos/student.proto",
+	Metadata: "app/protos/student.proto",
 }
