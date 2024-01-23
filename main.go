@@ -8,8 +8,8 @@ import (
 	"net"
 
 	pb "auth/app/protos"
-	_ "github.com/spf13/viper/remote"
 
+	_ "github.com/spf13/viper/remote"
 
 	"github.com/spf13/viper"
 	"github.com/uptrace/bun"
@@ -17,16 +17,18 @@ import (
 	"github.com/uptrace/bun/driver/pgdriver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 )
 
 func readConfig() {
 	// consulPath := os.Getenv("CONSUL_PATH")
 	// consulURL := os.Getenv("CONSUL_URL")
-	consulPath := "localhost:8500"
-	consulURL := "auth"
+	consulPath := "http://127.0.0.1:8500"
+	consulKey := "auth"
 
-	viper.AddRemoteProvider("consul", consulURL, consulPath)
-	viper.SetConfigType("json") // Need to explicitly set this to json
+	viper.AddRemoteProvider("consul", consulPath, consulKey)
+	viper.SetConfigType("json")
 
 	err := viper.ReadRemoteConfig()
 	if err != nil {
@@ -67,17 +69,25 @@ var Db *bun.DB
 
 func ConnectDB() {
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.Database.Host, config.Database.Port, config.Database.Username,
-		config.Database.Password, config.Database.DBName,
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		config.Database.Username, config.Database.Password,
+		config.Database.Host, config.Database.Port, config.Database.DBName,
 	)
+	fmt.Println(dsn)
 
-	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
+	connector := pgdriver.NewConnector(pgdriver.WithDSN(dsn))
+
+	sqldb := sql.OpenDB(connector)
 
 	db := bun.NewDB(sqldb, pgdialect.New())
 
 	// db.AutoMigrate(&Book{})
 	Db = db
+	migrator := migrate.NewMigrator(Db, pgdialect.New())
+	if err := migrator.CreateTable(context.Background(), &Student{}); err != nil {
+		panic(err)
+	}
+
 }
 
 var config AppConfig
