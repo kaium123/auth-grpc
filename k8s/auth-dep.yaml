@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-app
+  template:
+    metadata:
+      labels:
+        app: auth-app
+    spec:
+      containers:
+      - name: auth-app
+        image: kaium123/auth-token:latest
+        ports:
+        - containerPort: 50052
+        env:
+        - name: CONSUL_PATH
+          value: "auth"
+        - name: CONSUL_URL
+          value: "consul:8500"
+      restartPolicy: Always
