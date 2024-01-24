@@ -24,8 +24,8 @@ import (
 func readConfig() {
 	consulPath := os.Getenv("CONSUL_PATH")
 	consulURL := os.Getenv("CONSUL_URL")
-	// consulPath := "http://127.0.0.1:8500"
-	// consulKey := "auth"
+	// consulURL := "http://127.0.0.1:8500"
+	// consulPath := "auth"
 
 	viper.AddRemoteProvider("consul", consulURL, consulPath)
 	viper.SetConfigType("json")
@@ -73,16 +73,19 @@ func ConnectDB() {
 		config.Database.Username, config.Database.Password,
 		config.Database.Host, config.Database.Port, config.Database.DBName,
 	)
-	fmt.Println(dsn)
 
 	connector := pgdriver.NewConnector(pgdriver.WithDSN(dsn))
 	sqldb := sql.OpenDB(connector)
 	db := bun.NewDB(sqldb, pgdialect.New())
 
-	// db.AutoMigrate(&Book{})
 	Db = db
 
-	_, err := Db.NewCreateTable().Model(&Student{}).Exec(context.Background())
+	_, err := Db.NewCreateTable().Model(&Student{}).IfNotExists().Exec(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = Db.NewCreateTable().Model(&ActivityLog{}).IfNotExists().Exec(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -126,7 +129,7 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequestBody) (*pb.Login
 		return nil, err
 	}
 
-	activityLog := ActivityLog{}
+	activityLog := &ActivityLog{}
 	if user.UserName == req.Username && user.Password == req.Password {
 		_, err := db.NewInsert().Model(activityLog).Exec(context.Background())
 		if err != nil {
@@ -144,43 +147,51 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequestBody) (*pb.Login
 	return resp, nil
 }
 
-func (s *Server) GetToken(ctx context.Context, req *pb.Token) (*pb.GetTokenResponseBody, error) {
+func (s *Server) TokenValidation(ctx context.Context, req *pb.Token) (*pb.GetTokenResponseBody, error) {
 
-	activityLog := ActivityLog{}
+	activityLog := &ActivityLog{}
 	db := GetDB()
-	err := db.NewSelect().Model(&activityLog).Where("token = ?", req.Token).Scan(ctx)
+	err := db.NewSelect().Model(activityLog).Where("token = ?", req.Token).Scan(ctx)
 	if err != nil {
 		log.Printf("Error fetching user from database: %v", err)
 		return nil, err
 	}
 
-	
+	currentTime := time.Now().UTC()
+	expectedCreatedTime := currentTime.Add(time.Duration(-1*req.ExpirationTime) * time.Minute)
+
+	if activityLog.CreatedAt.UTC().Before(expectedCreatedTime) {
+		resp := &pb.GetTokenResponseBody{
+			Message: "not authorized",
+		}
+		return resp, nil
+	}
 
 	resp := &pb.GetTokenResponseBody{
-		Id: int32(activityLog.ID),
+		Id:      int32(activityLog.ID),
+		Message: "authenticated",
 	}
 
 	return resp, nil
 }
 
-func (s *Server) SignUp(ctx context.Context, req *pb.SignUpRequestBody) (*pb.LoginResponseBody, error) {
+func (s *Server) SignUp(ctx context.Context, req *pb.SignUpRequestBody) (*pb.SignUpResponseBody, error) {
 
-	newUser := Student{
+	newUser := &Student{
 		UserName: req.Username,
 		Password: req.Password,
 	}
 
 	db := GetDB()
-	_, err := db.NewInsert().Model(&newUser).Exec(ctx)
+	_, err := db.NewInsert().Model(newUser).Exec(ctx)
 	if err != nil {
 		log.Printf("Error creating new user: %v", err)
 		return nil, err
 	}
 
-	resp := &pb.LoginResponseBody{
-		Id:    int32(newUser.ID),
-		Msg:   "Signup successful",
-		Token: newUser.Token,
+	resp := &pb.SignUpResponseBody{
+		Id:  int32(newUser.ID),
+		Msg: "Signup successful",
 	}
 
 	return resp, nil

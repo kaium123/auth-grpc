@@ -12,12 +12,12 @@ service Student {
             post : "/auth/student/login"
         };
     }
-    rpc GetToken(Token) returns(GetTokenResponseBody){
+    rpc TokenValidation(Token) returns(GetTokenResponseBody){
         option (google.api.http) = {
             get : "/auth/student/get"
         };
     }
-    rpc SignUp(SignUpRequestBody) returns(LoginResponseBody){
+    rpc SignUp(SignUpRequestBody) returns(SignUpResponseBody){
         option (google.api.http) = {
             post : "/auth/student/signup"
         };
@@ -42,11 +42,17 @@ message GetTokenResponseBody {
 
 message Token {
    string token = 1;
+   int32 expiration_time = 2;
    
 }
 
 message SignUpRequestBody {
     string username = 1;
     string password = 2;
+}
+
+message SignUpResponseBody {
+    int32 id = 1;
+    string msg = 2;
 }
 

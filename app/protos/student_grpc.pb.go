@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Student_Login_FullMethodName    = "/book.Student/Login"
-	Student_GetToken_FullMethodName = "/book.Student/GetToken"
-	Student_SignUp_FullMethodName   = "/book.Student/SignUp"
+	Student_Login_FullMethodName           = "/book.Student/Login"
+	Student_TokenValidation_FullMethodName = "/book.Student/TokenValidation"
+	Student_SignUp_FullMethodName          = "/book.Student/SignUp"
 )
 
 // StudentClient is the client API for Student service.
@@ -29,8 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StudentClient interface {
 	Login(ctx context.Context, in *LoginRequestBody, opts ...grpc.CallOption) (*LoginResponseBody, error)
-	GetToken(ctx context.Context, in *Token, opts ...grpc.CallOption) (*GetTokenResponseBody, error)
-	SignUp(ctx context.Context, in *SignUpRequestBody, opts ...grpc.CallOption) (*LoginResponseBody, error)
+	TokenValidation(ctx context.Context, in *Token, opts ...grpc.CallOption) (*GetTokenResponseBody, error)
+	SignUp(ctx context.Context, in *SignUpRequestBody, opts ...grpc.CallOption) (*SignUpResponseBody, error)
 }
 
 type studentClient struct {
@@ -50,17 +50,17 @@ func (c *studentClient) Login(ctx context.Context, in *LoginRequestBody, opts ..
 	return out, nil
 }
 
-func (c *studentClient) GetToken(ctx context.Context, in *Token, opts ...grpc.CallOption) (*GetTokenResponseBody, error) {
+func (c *studentClient) TokenValidation(ctx context.Context, in *Token, opts ...grpc.CallOption) (*GetTokenResponseBody, error) {
 	out := new(GetTokenResponseBody)
-	err := c.cc.Invoke(ctx, Student_GetToken_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Student_TokenValidation_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *studentClient) SignUp(ctx context.Context, in *SignUpRequestBody, opts ...grpc.CallOption) (*LoginResponseBody, error) {
-	out := new(LoginResponseBody)
+func (c *studentClient) SignUp(ctx context.Context, in *SignUpRequestBody, opts ...grpc.CallOption) (*SignUpResponseBody, error) {
+	out := new(SignUpResponseBody)
 	err := c.cc.Invoke(ctx, Student_SignUp_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -73,8 +73,8 @@ func (c *studentClient) SignUp(ctx context.Context, in *SignUpRequestBody, opts 
 // for forward compatibility
 type StudentServer interface {
 	Login(context.Context, *LoginRequestBody) (*LoginResponseBody, error)
-	GetToken(context.Context, *Token) (*GetTokenResponseBody, error)
-	SignUp(context.Context, *SignUpRequestBody) (*LoginResponseBody, error)
+	TokenValidation(context.Context, *Token) (*GetTokenResponseBody, error)
+	SignUp(context.Context, *SignUpRequestBody) (*SignUpResponseBody, error)
 	mustEmbedUnimplementedStudentServer()
 }
 
@@ -85,10 +85,10 @@ type UnimplementedStudentServer struct {
 func (UnimplementedStudentServer) Login(context.Context, *LoginRequestBody) (*LoginResponseBody, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedStudentServer) GetToken(context.Context, *Token) (*GetTokenResponseBody, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetToken not implemented")
+func (UnimplementedStudentServer) TokenValidation(context.Context, *Token) (*GetTokenResponseBody, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TokenValidation not implemented")
 }
-func (UnimplementedStudentServer) SignUp(context.Context, *SignUpRequestBody) (*LoginResponseBody, error) {
+func (UnimplementedStudentServer) SignUp(context.Context, *SignUpRequestBody) (*SignUpResponseBody, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignUp not implemented")
 }
 func (UnimplementedStudentServer) mustEmbedUnimplementedStudentServer() {}
@@ -122,20 +122,20 @@ func _Student_Login_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Student_GetToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Student_TokenValidation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Token)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StudentServer).GetToken(ctx, in)
+		return srv.(StudentServer).TokenValidation(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Student_GetToken_FullMethodName,
+		FullMethod: Student_TokenValidation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StudentServer).GetToken(ctx, req.(*Token))
+		return srv.(StudentServer).TokenValidation(ctx, req.(*Token))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -170,8 +170,8 @@ var Student_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Student_Login_Handler,
 		},
 		{
-			MethodName: "GetToken",
-			Handler:    _Student_GetToken_Handler,
+			MethodName: "TokenValidation",
+			Handler:    _Student_TokenValidation_Handler,
 		},
 		{
 			MethodName: "SignUp",
