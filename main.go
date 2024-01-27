@@ -32,7 +32,15 @@ func readConfig() {
 
 	err := viper.ReadRemoteConfig()
 	if err != nil {
-		panic(err)
+		consulURL := "http://127.0.0.1:8500"
+		consulPath := "auth"
+		viper.AddRemoteProvider("consul", consulURL, consulPath)
+		viper.SetConfigType("json")
+
+		err := viper.ReadRemoteConfig()
+		if err!=nil{
+			panic(err)
+		}
 	}
 
 	err = viper.Unmarshal(&config)
@@ -101,7 +109,8 @@ func GetDB() *bun.DB {
 }
 
 type Server struct {
-	pb.UnimplementedStudentServer
+	pb.UnimplementedAuthServer
+	pb.UnimplementedBookServer
 }
 
 type Student struct {
@@ -210,7 +219,7 @@ func main() {
 	s := grpc.NewServer()
 	reflection.Register(s)
 
-	pb.RegisterStudentServer(s, &Server{})
+	pb.RegisterAuthServer(s, &Server{})
 
 	fmt.Println("gRPC server is running on port " + config.Server.Port)
 

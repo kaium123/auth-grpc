@@ -38,9 +38,9 @@ static_resources:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
               # proto_descriptor_path: "/home/upay/Desktop/envoy/example.pb"
-              proto_descriptor: "/etc/envoy/protos/book.pb"
+              proto_descriptor: "/etc/envoy/protos/app.pb"
               # services: ["helloworld.Greeter"]
-              services: ["book.Book"]
+              services: ["app.Book",app.Auth]
               match_incoming_request_route: false
               ignore_unknown_query_parameters: true
               auto_mapping: false
@@ -93,7 +93,7 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: grpc-service
-                      port_value: 50051
+                      address: auth-service
+                      port_value: 50053
 
     

@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package app;
+option go_package ="/";
+import "google/api/annotations.proto";
+
+
+service Book {
+    rpc CreateBook(CreateBookRequestBody) returns(CreateBookResponseBody){
+        option (google.api.http) = {
+            post : "/app/book/create"
+        };
+    }
+    rpc GetBook(BookID) returns(GetBookResponseBody){
+        option (google.api.http) = {
+            get : "/app/book/get"
+        };
+    }
+    rpc UpdateBook(UpdateBookRequestBody) returns(CreateBookResponseBody){
+        option (google.api.http) = {
+            post : "/app/update"
+        };
+    }
+}
+
+message CreateBookRequestBody {
+    string name = 1;
+    int32 author_id = 2;
+}
+
+message CreateBookResponseBody {
+    int32 id = 1;
+    string msg = 2;
+}
+
+message GetBookResponseBody {
+    int32 id = 1;
+    string name = 2;
+    int32 author_id = 3;
+}
+
+message BookID {
+    int32 id = 1;
+}
+
+message UpdateBookRequestBody {
+    int32 id = 1;
+    string name = 2;
+    int32 author_id = 3;
+}
+
+
+service Auth {
+    rpc Login(LoginRequestBody) returns(LoginResponseBody){
+        option (google.api.http) = {
+            post : "/auth/student/login"
+        };
+    }
+    rpc TokenValidation(Token) returns(GetTokenResponseBody){
+        option (google.api.http) = {
+            get : "/auth/student/get"
+        };
+    }
+    rpc SignUp(SignUpRequestBody) returns(SignUpResponseBody){
+        option (google.api.http) = {
+            post : "/auth/student/signup"
+        };
+    }
+}
+
+message LoginRequestBody {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponseBody {
+    int32 id = 1;
+    string msg = 2;
+    string token = 3;
+}
+
+message GetTokenResponseBody {
+    int32 id = 1;
+    string message = 2;
+}
+
+message Token {
+   string token = 1;
+   int32 expiration_time = 2;
+   
+}
+
+message SignUpRequestBody {
+    string username = 1;
+    string password = 2;
+}
+
+message SignUpResponseBody {
+    int32 id = 1;
+    string msg = 2;
+}
+
