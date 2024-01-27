@@ -38,7 +38,7 @@ func readConfig() {
 		viper.SetConfigType("json")
 
 		err := viper.ReadRemoteConfig()
-		if err!=nil{
+		if err != nil {
 			panic(err)
 		}
 	}
@@ -130,6 +130,7 @@ type ActivityLog struct {
 }
 
 func (s *Server) Login(ctx context.Context, req *pb.LoginRequestBody) (*pb.LoginResponseBody, error) {
+	fmt.Println(req.Password, " ", req.Username)
 	var user Student
 	db := GetDB()
 	err := db.NewSelect().Model(&user).Where("user_name = ?", req.Username).Where("password = ?", req.Password).Scan(ctx)
@@ -157,6 +158,7 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequestBody) (*pb.Login
 }
 
 func (s *Server) TokenValidation(ctx context.Context, req *pb.Token) (*pb.GetTokenResponseBody, error) {
+	fmt.Println(req.Token, " ", req.ExpirationTime)
 
 	activityLog := &ActivityLog{}
 	db := GetDB()
@@ -169,6 +171,8 @@ func (s *Server) TokenValidation(ctx context.Context, req *pb.Token) (*pb.GetTok
 	currentTime := time.Now().UTC()
 	expectedCreatedTime := currentTime.Add(time.Duration(-1*req.ExpirationTime) * time.Minute)
 
+	fmt.Println(activityLog)
+	fmt.Println(activityLog.CreatedAt.UTC(), " ---------  ", expectedCreatedTime)
 	if activityLog.CreatedAt.UTC().Before(expectedCreatedTime) {
 		resp := &pb.GetTokenResponseBody{
 			Message: "not authorized",
@@ -185,6 +189,7 @@ func (s *Server) TokenValidation(ctx context.Context, req *pb.Token) (*pb.GetTok
 }
 
 func (s *Server) SignUp(ctx context.Context, req *pb.SignUpRequestBody) (*pb.SignUpResponseBody, error) {
+	fmt.Println(req)
 
 	newUser := &Student{
 		UserName: req.Username,
